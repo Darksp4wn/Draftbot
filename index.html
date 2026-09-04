@@ -1,0 +1,1401 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>🏈 DraftBot 2026</title>
+
+<style>
+:root{
+  --bg:#09101d;
+  --card:#141e31;
+  --card2:#1d2a43;
+  --border:#30405f;
+  --text:#f5f7ff;
+  --muted:#9aa9c5;
+  --green:#55d6a4;
+  --blue:#68aaff;
+  --red:#ff7180;
+  --yellow:#ffd166;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-size:15px;
+}
+
+button,select{
+  font:inherit;
+}
+
+button{
+  border:0;
+  border-radius:11px;
+  padding:11px 14px;
+  color:var(--text);
+  background:var(--card2);
+  cursor:pointer;
+}
+
+button:active{
+  transform:scale(.97);
+}
+
+button.primary{
+  background:var(--green);
+  color:#06140f;
+  font-weight:800;
+}
+
+button.danger{
+  background:#642b38;
+}
+
+button.small{
+  padding:7px 10px;
+  font-size:12px;
+}
+
+select{
+  width:100%;
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:9px;
+  color:var(--text);
+  background:var(--card2);
+}
+
+header{
+  position:sticky;
+  top:0;
+  z-index:10;
+  padding:13px 14px;
+  border-bottom:1px solid var(--border);
+  background:#09101dee;
+  backdrop-filter:blur(12px);
+}
+
+main{
+  width:100%;
+  max-width:1250px;
+  margin:auto;
+  padding:12px;
+}
+
+h1{
+  margin:0;
+  font-size:21px;
+}
+
+h2{
+  margin:0 0 12px;
+  font-size:16px;
+}
+
+h3{
+  margin:13px 0 7px;
+  font-size:14px;
+}
+
+.sub{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.muted{
+  color:var(--muted);
+}
+
+.flex{
+  display:flex;
+  gap:7px;
+  flex-wrap:wrap;
+}
+
+.between{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+
+.layout{
+  display:grid;
+  gap:12px;
+}
+
+@media(min-width:850px){
+  .layout{
+    grid-template-columns:380px 1fr;
+  }
+}
+
+.card{
+  padding:14px;
+  border:1px solid var(--border);
+  border-radius:16px;
+  background:var(--card);
+}
+
+.settings-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:9px;
+}
+
+.settings-grid label{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.status{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+  margin-bottom:12px;
+}
+
+.stat{
+  padding:10px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:var(--card);
+}
+
+.stat strong{
+  display:block;
+  font-size:19px;
+}
+
+.stat span{
+  color:var(--muted);
+  font-size:11px;
+}
+
+.turn{
+  margin-bottom:12px;
+  padding:14px;
+  border-radius:14px;
+  background:var(--card2);
+}
+
+.turn.mine{
+  outline:2px solid var(--green);
+  background:#12372e;
+}
+
+.turn strong{
+  display:block;
+  margin-top:3px;
+  font-size:19px;
+}
+
+.recommendation{
+  position:sticky;
+  top:76px;
+  z-index:4;
+  border-color:#347862;
+  background:linear-gradient(135deg,#14382f,#17253d);
+}
+
+.recommendation .recommended-name{
+  margin:4px 0;
+  font-size:23px;
+  font-weight:850;
+}
+
+.bot-score{
+  float:right;
+  color:var(--yellow);
+  font-size:27px;
+  font-weight:900;
+}
+
+.badge{
+  display:inline-block;
+  margin:2px;
+  padding:3px 8px;
+  border-radius:20px;
+  background:#30415e;
+  color:#dfebff;
+  font-size:11px;
+}
+
+.reason{
+  margin:7px 0;
+  padding-left:20px;
+  color:#d8e2f4;
+  font-size:13px;
+  line-height:1.5;
+}
+
+.tabs{
+  display:flex;
+  gap:6px;
+  overflow-x:auto;
+  margin-bottom:9px;
+}
+
+.tabs button{
+  white-space:nowrap;
+  padding:8px 11px;
+}
+
+.tabs button.active{
+  background:var(--blue);
+  color:#061321;
+  font-weight:800;
+}
+
+.board{
+  display:grid;
+  gap:6px;
+  max-height:650px;
+  overflow-y:auto;
+}
+
+.player-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:center;
+  gap:8px;
+  padding:9px;
+  border:1px solid var(--border);
+  border-radius:11px;
+  background:#111a2c;
+}
+
+.player-name{
+  font-weight:750;
+}
+
+.player-meta{
+  color:var(--muted);
+  font-size:12px;
+}
+
+.rank{
+  color:var(--yellow);
+}
+
+.player-row button{
+  background:#245a72;
+  font-weight:800;
+}
+
+.player-row button.enemy{
+  background:#482936;
+  color:#ffadb5;
+}
+
+.roster{
+  display:grid;
+  gap:5px;
+}
+
+.roster-slot{
+  display:flex;
+  justify-content:space-between;
+  padding:8px 10px;
+  border-radius:8px;
+  background:#111a2c;
+}
+
+.roster-slot small{
+  color:var(--muted);
+}
+
+.history{
+  max-height:380px;
+  overflow-y:auto;
+}
+
+.history-pick{
+  padding:7px;
+  border-bottom:1px solid var(--border);
+  font-size:13px;
+}
+
+.history-pick.mine{
+  color:var(--green);
+  font-weight:750;
+}
+
+.empty{
+  padding:20px;
+  color:var(--muted);
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="between">
+    <div>
+      <h1>🏈 DraftBot 2026</h1>
+      <div class="sub">Offline Fantasy Football Draft Assistant</div>
+    </div>
+    <button id="resetButton" class="small danger">Reset</button>
+  </div>
+</header>
+
+<main>
+  <div class="layout">
+
+    <section>
+      <div class="card">
+        <h2>League-Einstellungen</h2>
+
+        <div class="settings-grid">
+          <label>
+            Anzahl Teams
+            <select id="teamsSelect"></select>
+          </label>
+
+          <label>
+            Draft-Slot
+            <select id="slotSelect"></select>
+          </label>
+
+          <label>
+            Scoring
+            <select id="scoringSelect">
+              <option value="ppr">PPR</option>
+              <option value="half">Half PPR</option>
+              <option value="standard">Standard</option>
+            </select>
+          </label>
+
+          <label>
+            Roster
+            <select id="rosterSelect">
+              <option value="standard">Standard</option>
+              <option value="threeWR">3-WR</option>
+              <option value="superflex">Superflex</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div id="recommendationBox" class="card recommendation" style="margin-top:12px"></div>
+
+      <div class="card" style="margin-top:12px">
+        <div class="between">
+          <h2>Mein Kader</h2>
+          <button id="undoButton" class="small">↶ Rückgängig</button>
+        </div>
+        <div id="rosterBox" class="roster"></div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h2>Draft-Verlauf</h2>
+        <div id="historyBox" class="history"></div>
+      </div>
+    </section>
+
+    <section>
+      <div id="statusBox"></div>
+      <div id="turnBox"></div>
+
+      <div class="card">
+        <div class="between">
+          <h2>Draft Board</h2>
+          <span id="availableCount" class="muted"></span>
+        </div>
+
+        <div id="filterBox" class="tabs"></div>
+        <div id="boardBox" class="board"></div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+"use strict";
+
+/* -------------------------------------------------------
+   SPIELERDATEN
+------------------------------------------------------- */
+
+const playerData = {
+QB: `
+Josh Allen|BUF;
+Lamar Jackson|BAL;
+Jalen Hurts|PHI;
+Joe Burrow|CIN;
+Patrick Mahomes|KC;
+Jayden Daniels|WAS;
+Justin Herbert|LAC;
+C.J. Stroud|HOU;
+Jordan Love|GB;
+Brock Purdy|SF;
+Tua Tagovailoa|MIA;
+Caleb Williams|CHI;
+Anthony Richardson|IND;
+Drake Maye|NE;
+Bo Nix|DEN;
+Trevor Lawrence|JAX;
+Kyler Murray|ARI;
+Baker Mayfield|TB;
+Dak Prescott|DAL;
+Jared Goff|DET;
+Kirk Cousins|ATL;
+Matthew Stafford|LAR;
+Justin Fields|NYJ;
+Sam Darnold|SEA
+`,
+
+RB: `
+Bijan Robinson|ATL;
+Saquon Barkley|PHI;
+Jahmyr Gibbs|DET;
+Jonathan Taylor|IND;
+De'Von Achane|MIA;
+Christian McCaffrey|SF;
+Ashton Jeanty|LV;
+Breece Hall|NYJ;
+Kyren Williams|LAR;
+Josh Jacobs|GB;
+James Cook|BUF;
+Derrick Henry|BAL;
+Alvin Kamara|NO;
+Isiah Pacheco|KC;
+Chase Brown|CIN;
+Kenneth Walker III|SEA;
+Chuba Hubbard|CAR;
+David Montgomery|DET;
+James Conner|ARI;
+Joe Mixon|HOU;
+Rhamondre Stevenson|NE;
+Najee Harris|LAC;
+Travis Etienne Jr.|JAX;
+Jaylen Warren|PIT;
+Zach Charbonnet|SEA;
+Tyjae Spears|TEN;
+TreVeyon Henderson|NE;
+Nick Chubb|HOU;
+Jordan Mason|MIN;
+Rico Dowdle|CAR;
+Tank Bigsby|JAX;
+Tyler Allgeier|ATL;
+Ray Davis|BUF;
+Bucky Irving|TB;
+Jerome Ford|CLE;
+Austin Ekeler|WAS;
+Rachaad White|TB;
+Javonte Williams|DAL;
+D'Andre Swift|CHI;
+Brian Robinson Jr.|SF;
+Trey Benson|ARI;
+MarShawn Lloyd|GB;
+Ty Chandler|MIN
+`,
+
+WR: `
+Ja'Marr Chase|CIN;
+Justin Jefferson|MIN;
+CeeDee Lamb|DAL;
+Amon-Ra St. Brown|DET;
+Tyreek Hill|MIA;
+Malik Nabers|NYG;
+Puka Nacua|LAR;
+Marvin Harrison Jr.|ARI;
+Nico Collins|HOU;
+Brian Thomas Jr.|JAX;
+Garrett Wilson|NYJ;
+Drake London|ATL;
+Chris Olave|NO;
+Deebo Samuel|WAS;
+Jaxon Smith-Njigba|SEA;
+Ladd McConkey|LAC;
+Jaylen Waddle|MIA;
+D.K. Metcalf|PIT;
+Brandon Aiyuk|SF;
+Tee Higgins|CIN;
+Michael Pittman Jr.|IND;
+George Pickens|DAL;
+DeVonta Smith|PHI;
+Cooper Kupp|SEA;
+Jameson Williams|DET;
+Zay Flowers|BAL;
+Jordan Addison|MIN;
+Terry McLaurin|WAS;
+Calvin Ridley|TEN;
+Marquise Brown|KC;
+Christian Watson|GB;
+Stefon Diggs|NE;
+Jakobi Meyers|LV;
+Jayden Reed|GB;
+Chris Godwin|TB;
+Keon Coleman|BUF;
+Josh Downs|IND;
+Rome Odunze|CHI;
+Rashod Bateman|BAL;
+DeMario Douglas|NE;
+Adonai Mitchell|IND;
+Quentin Johnston|LAC;
+Pat Bryant|DEN;
+Tyler Lockett|TEN;
+Michael Wilson|ARI;
+Dontayvion Wicks|GB;
+Marvin Mims Jr.|DEN;
+Cedric Tillman|CLE;
+Elijah Moore|CLE;
+Ray-Ray McCloud|ATL;
+Noah Brown|WAS;
+Allen Lazard|NYJ;
+Demarcus Robinson|SF;
+Wan'Dale Robinson|NYG;
+Xavier Worthy|KC;
+Ricky Pearsall|SF;
+Khalil Shakir|BUF;
+Jahan Dotson|PHI
+`,
+
+TE: `
+Trey McBride|ARI;
+Sam LaPorta|DET;
+Brock Bowers|LV;
+George Kittle|SF;
+Travis Kelce|KC;
+Mark Andrews|BAL;
+Dalton Kincaid|BUF;
+T.J. Hockenson|MIN;
+Evan Engram|DEN;
+Dallas Goedert|PHI;
+Kyle Pitts|ATL;
+David Njoku|CLE;
+Jake Ferguson|DAL;
+Pat Freiermuth|PIT;
+Tyler Warren|IND;
+Isaiah Likely|BAL;
+Hunter Henry|NE;
+Chigoziem Okonkwo|TEN;
+Cade Otton|TB;
+Tucker Kraft|GB;
+Noah Fant|SEA;
+Jonnu Smith|PIT;
+Cole Kmet|CHI;
+Luke Musgrave|GB
+`,
+
+K: `
+Brandon Aubrey|DAL;
+Justin Tucker|BAL;
+Harrison Butker|KC;
+Ka'imi Fairbairn|HOU;
+Chris Boswell|PIT;
+Jason Sanders|MIA;
+Cameron Dicker|LAC;
+Tyler Bass|BUF;
+Younghoe Koo|ATL;
+Jason Myers|SEA;
+Jake Elliott|PHI;
+Daniel Carlson|LV;
+Wil Lutz|DEN;
+Matt Gay|WAS;
+Chase McLaughlin|TB
+`,
+
+DST: `
+Philadelphia Eagles|PHI;
+San Francisco 49ers|SF;
+Baltimore Ravens|BAL;
+Kansas City Chiefs|KC;
+Cleveland Browns|CLE;
+Dallas Cowboys|DAL;
+Buffalo Bills|BUF;
+New York Jets|NYJ;
+Detroit Lions|DET;
+Pittsburgh Steelers|PIT;
+Miami Dolphins|MIA;
+Denver Broncos|DEN;
+Houston Texans|HOU;
+Los Angeles Chargers|LAC;
+Green Bay Packers|GB;
+Chicago Bears|CHI
+`
+};
+
+const positions = ["QB","RB","WR","TE","K","DST"];
+
+let players = [];
+let activeFilter = "ALL";
+let state = null;
+
+/* Sichere DOM-Referenzen – wichtig für Safari */
+const teamsSelect = document.getElementById("teamsSelect");
+const slotSelect = document.getElementById("slotSelect");
+const scoringSelect = document.getElementById("scoringSelect");
+const rosterSelect = document.getElementById("rosterSelect");
+const resetButton = document.getElementById("resetButton");
+const undoButton = document.getElementById("undoButton");
+
+const statusBox = document.getElementById("statusBox");
+const turnBox = document.getElementById("turnBox");
+const recommendationBox = document.getElementById("recommendationBox");
+const rosterBox = document.getElementById("rosterBox");
+const historyBox = document.getElementById("historyBox");
+const filterBox = document.getElementById("filterBox");
+const boardBox = document.getElementById("boardBox");
+const availableCount = document.getElementById("availableCount");
+
+/* -------------------------------------------------------
+   GRUNDFUNKTIONEN
+------------------------------------------------------- */
+
+function createDefaultState(){
+  return {
+    teams:11,
+    slot:1,
+    scoring:"ppr",
+    roster:"standard",
+    currentPick:1,
+    drafted:[],
+    history:[],
+    undo:[]
+  };
+}
+
+function buildPlayers(){
+  players = [];
+
+  positions.forEach(position => {
+    const rows = playerData[position]
+      .split(";")
+      .map(row => row.trim())
+      .filter(Boolean);
+
+    rows.forEach((row,index) => {
+      const parts = row.split("|");
+
+      players.push({
+        id: position + "-" + index + "-" + parts[0],
+        name: parts[0],
+        team: parts[1],
+        pos: position,
+        positionRank:index + 1,
+        tier:index < 3 ? 1 : index < 8 ? 2 : index < 16 ? 3 : index < 28 ? 4 : 5,
+        rank:0
+      });
+    });
+  });
+
+  const valueBase = {
+    QB:55,
+    RB:100,
+    WR:98,
+    TE:65,
+    K:12,
+    DST:11
+  };
+
+  players.sort((a,b) => {
+    const av = valueBase[a.pos] - a.positionRank;
+    const bv = valueBase[b.pos] - b.positionRank;
+    return bv - av;
+  });
+
+  players.forEach((player,index) => {
+    player.rank = index + 1;
+  });
+}
+
+function saveState(){
+  localStorage.setItem("draftbot2026", JSON.stringify(state));
+}
+
+function loadState(){
+  try{
+    const saved = localStorage.getItem("draftbot2026");
+    state = saved ? JSON.parse(saved) : createDefaultState();
+  }catch(error){
+    state = createDefaultState();
+  }
+
+  if(!Array.isArray(state.drafted)) state.drafted = [];
+  if(!Array.isArray(state.history)) state.history = [];
+  if(!Array.isArray(state.undo)) state.undo = [];
+}
+
+function totalRounds(){
+  if(state.roster === "threeWR") return 10;
+  if(state.roster === "superflex") return 10;
+  return 9;
+}
+
+function totalPicks(){
+  return state.teams * totalRounds();
+}
+
+/* Korrekter Snake-Draft */
+function teamAtPick(pickNumber){
+  const roundIndex = Math.floor((pickNumber - 1) / state.teams);
+  const positionInRound = (pickNumber - 1) % state.teams;
+
+  if(roundIndex % 2 === 0){
+    return positionInRound + 1;
+  }
+
+  return state.teams - positionInRound;
+}
+
+function isMyPick(pickNumber = state.currentPick){
+  return teamAtPick(pickNumber) === Number(state.slot);
+}
+
+function getNextOwnPick(){
+  for(let pick = state.currentPick + 1; pick <= totalPicks(); pick++){
+    if(isMyPick(pick)) return pick;
+  }
+
+  return null;
+}
+
+function getAvailablePlayers(){
+  const draftedIds = new Set(state.drafted.map(item => item.id));
+  return players.filter(player => !draftedIds.has(player.id));
+}
+
+function getPlayer(id){
+  return players.find(player => player.id === id);
+}
+
+function saveUndo(){
+  const copy = JSON.parse(JSON.stringify({
+    teams:state.teams,
+    slot:state.slot,
+    scoring:state.scoring,
+    roster:state.roster,
+    currentPick:state.currentPick,
+    drafted:state.drafted,
+    history:state.history
+  }));
+
+  state.undo.push(copy);
+
+  if(state.undo.length > 20){
+    state.undo.shift();
+  }
+}
+
+/* -------------------------------------------------------
+   ROSTER UND DRAFTBOT
+------------------------------------------------------- */
+
+function rosterLimits(){
+  if(state.roster === "threeWR"){
+    return {QB:1,RB:2,WR:3,TE:1,FLEX:1,K:1,DST:1};
+  }
+
+  if(state.roster === "superflex"){
+    return {QB:1,RB:2,WR:2,TE:1,FLEX:1,SF:1,K:1,DST:1};
+  }
+
+  return {QB:1,RB:2,WR:2,TE:1,FLEX:1,K:1,DST:1};
+}
+
+function getMyPlayers(){
+  return state.drafted
+    .filter(item => item.team === Number(state.slot))
+    .map(item => getPlayer(item.id))
+    .filter(Boolean);
+}
+
+function getMyCounts(){
+  const counts = {
+    QB:0,
+    RB:0,
+    WR:0,
+    TE:0,
+    K:0,
+    DST:0
+  };
+
+  getMyPlayers().forEach(player => {
+    counts[player.pos]++;
+  });
+
+  return counts;
+}
+
+function positionNeed(player){
+  const counts = getMyCounts();
+  const limits = rosterLimits();
+
+  if(player.pos === "QB" && counts.QB < limits.QB) return 1;
+  if(player.pos === "RB" && counts.RB < limits.RB) return 1;
+  if(player.pos === "WR" && counts.WR < limits.WR) return 1;
+  if(player.pos === "TE" && counts.TE < limits.TE) return 1;
+  if(player.pos === "K" && counts.K < limits.K) return .4;
+  if(player.pos === "DST" && counts.DST < limits.DST) return .4;
+
+  if(
+    ["RB","WR","TE"].includes(player.pos) &&
+    counts.RB + counts.WR + counts.TE < limits.RB + limits.WR + limits.TE + 1
+  ){
+    return .5;
+  }
+
+  if(state.roster === "superflex" && player.pos === "QB" && counts.QB < 2){
+    return .75;
+  }
+
+  return .08;
+}
+
+function positionalScarcity(player){
+  const samePosition = getAvailablePlayers()
+    .filter(item => item.pos === player.pos)
+    .sort((a,b) => a.positionRank - b.positionRank);
+
+  const index = samePosition.findIndex(item => item.id === player.id);
+
+  if(index < 0) return 0;
+
+  const tierRemaining = samePosition.filter(
+    item => item.tier === player.tier
+  ).length;
+
+  const rankScarcity =
+    1 - index / Math.max(1,samePosition.length);
+
+  const tierBonus = tierRemaining <= 2 ? .35 : 0;
+
+  return rankScarcity + tierBonus;
+}
+
+function likelyAvailableAtNextPick(player){
+  const nextPick = getNextOwnPick();
+
+  if(!nextPick) return 1;
+
+  const picksUntilNextTurn =
+    Math.max(0, nextPick - state.currentPick - 1);
+
+  let risk = .006;
+
+  if(player.rank <= 30) risk = .025;
+  else if(player.rank <= 80) risk = .014;
+  else if(player.rank <= 130) risk = .008;
+
+  return Math.max(
+    0,
+    Math.min(1, 1 - risk * picksUntilNextTurn)
+  );
+}
+
+function scoringBonus(player){
+  if(state.scoring === "ppr"){
+    if(["RB","WR","TE"].includes(player.pos)) return 4;
+  }
+
+  if(state.scoring === "half"){
+    if(["RB","WR"].includes(player.pos)) return 2;
+  }
+
+  return 0;
+}
+
+function botScore(player){
+  const value = Math.max(0,100 - player.rank * .30);
+  const need = positionNeed(player) * 24;
+  const scarcity = positionalScarcity(player) * 8;
+  const tier = player.tier === 1 ? 8 : player.tier === 2 ? 3 : 0;
+  const survival = likelyAvailableAtNextPick(player) * 8;
+  const scoring = scoringBonus(player);
+
+  return Math.round(value + need + scarcity + tier + survival + scoring);
+}
+
+function explainPlayer(player){
+  const reasons = [];
+
+  if(player.rank <= 25){
+    reasons.push("hoher Player Value");
+  }
+
+  if(positionNeed(player) >= .8){
+    reasons.push("passt zu deinem aktuellen Kader");
+  }
+
+  if(positionalScarcity(player) > .85){
+    reasons.push("diese Position wird schnell knapp");
+  }
+
+  if(player.tier <= 2){
+    reasons.push("starkes Tier");
+  }
+
+  if(likelyAvailableAtNextPick(player) < .55){
+    reasons.push("wird wahrscheinlich vor deinem nächsten Pick gedraftet");
+  }else{
+    reasons.push("gute Chance, dass er verfügbar bleibt");
+  }
+
+  return reasons;
+}
+
+function getRecommendation(){
+  return getAvailablePlayers()
+    .map(player => ({
+      player,
+      score:botScore(player)
+    }))
+    .sort((a,b) => b.score - a.score)[0];
+}
+
+/* -------------------------------------------------------
+   DRAFT-AKTIONEN
+------------------------------------------------------- */
+
+function makePick(playerId){
+  if(state.currentPick > totalPicks()) return;
+
+  const player = getPlayer(playerId);
+
+  if(!player) return;
+
+  const alreadyDrafted = state.drafted.some(
+    item => item.id === playerId
+  );
+
+  if(alreadyDrafted) return;
+
+  saveUndo();
+
+  const pick = {
+    id:player.id,
+    pickNumber:state.currentPick,
+    team:teamAtPick(state.currentPick)
+  };
+
+  state.drafted.push(pick);
+  state.history.push(pick);
+  state.currentPick++;
+
+  saveState();
+  render();
+}
+
+function undoLastPick(){
+  if(state.undo.length === 0){
+    alert("Es gibt keinen Pick zum Rückgängigmachen.");
+    return;
+  }
+
+  const oldState = state.undo.pop();
+
+  state.teams = oldState.teams;
+  state.slot = oldState.slot;
+  state.scoring = oldState.scoring;
+  state.roster = oldState.roster;
+  state.currentPick = oldState.currentPick;
+  state.drafted = oldState.drafted;
+  state.history = oldState.history;
+
+  saveState();
+  render();
+}
+
+function resetDraft(){
+  const answer = confirm(
+    "Den gesamten Draft wirklich zurücksetzen?"
+  );
+
+  if(!answer) return;
+
+  state = createDefaultState();
+  saveState();
+  fillSettings();
+  render();
+}
+
+/* -------------------------------------------------------
+   EINSTELLUNGEN
+------------------------------------------------------- */
+
+function fillSettings(){
+  teamsSelect.innerHTML = "";
+
+  for(let teams = 8; teams <= 16; teams++){
+    teamsSelect.innerHTML +=
+      `<option value="${teams}">${teams} Teams</option>`;
+  }
+
+  teamsSelect.value = state.teams;
+
+  fillSlots();
+
+  scoringSelect.value = state.scoring;
+  rosterSelect.value = state.roster;
+}
+
+function fillSlots(){
+  slotSelect.innerHTML = "";
+
+  for(let slot = 1; slot <= state.teams; slot++){
+    slotSelect.innerHTML +=
+      `<option value="${slot}">Slot ${slot}</option>`;
+  }
+
+  slotSelect.value = state.slot;
+}
+
+teamsSelect.addEventListener("change",() => {
+  state.teams = Number(teamsSelect.value);
+  state.slot = 1;
+  state.currentPick = 1;
+  state.drafted = [];
+  state.history = [];
+  state.undo = [];
+
+  fillSlots();
+  saveState();
+  render();
+});
+
+slotSelect.addEventListener("change",() => {
+  state.slot = Number(slotSelect.value);
+  saveState();
+  render();
+});
+
+scoringSelect.addEventListener("change",() => {
+  state.scoring = scoringSelect.value;
+  saveState();
+  render();
+});
+
+rosterSelect.addEventListener("change",() => {
+  state.roster = rosterSelect.value;
+  state.currentPick = 1;
+  state.drafted = [];
+  state.history = [];
+  state.undo = [];
+
+  saveState();
+  render();
+});
+
+resetButton.addEventListener("click",resetDraft);
+undoButton.addEventListener("click",undoLastPick);
+
+/* -------------------------------------------------------
+   AUSGABE
+------------------------------------------------------- */
+
+function renderStatus(){
+  const current = Math.min(state.currentPick,totalPicks());
+  const round = Math.ceil(current / state.teams);
+  const nextOwn = getNextOwnPick();
+
+  statusBox.innerHTML = `
+    <div class="status">
+      <div class="stat">
+        <strong>${current}/${totalPicks()}</strong>
+        <span>Pick</span>
+      </div>
+      <div class="stat">
+        <strong>${round}</strong>
+        <span>Runde</span>
+      </div>
+      <div class="stat">
+        <strong>${nextOwn || "—"}</strong>
+        <span>Nächster eigener Pick</span>
+      </div>
+    </div>
+  `;
+
+  if(state.currentPick > totalPicks()){
+    turnBox.innerHTML = `
+      <div class="turn mine">
+        <div class="sub">Draft beendet</div>
+        <strong>🏁 Alle Picks abgeschlossen</strong>
+      </div>
+    `;
+    return;
+  }
+
+  const currentTeam = teamAtPick(state.currentPick);
+  const mine = isMyPick();
+
+  turnBox.innerHTML = `
+    <div class="turn ${mine ? "mine" : ""}">
+      <div class="sub">
+        Pick #${state.currentPick} · Team ${currentTeam}
+      </div>
+
+      <strong>
+        ${mine ? "🟢 DU BIST AM ZUG" : "🔵 Team " + currentTeam + " ist am Zug"}
+      </strong>
+
+      ${
+        !mine && nextOwn()
+        ? `<div class="sub">
+             Noch ${nextOwn() - state.currentPick}
+             Pick(s) bis zu deinem Zug
+           </div>`
+        : ""
+      }
+    </div>
+  `;
+}
+
+function renderRecommendation(){
+  if(!isMyPick() || state.currentPick > totalPicks()){
+    recommendationBox.innerHTML = `
+      <h2>🧠 DraftBot</h2>
+      <div class="muted">
+        Warte auf deinen nächsten eigenen Pick.
+      </div>
+    `;
+    return;
+  }
+
+  const recommendation = getRecommendation();
+
+  if(!recommendation){
+    recommendationBox.innerHTML =
+      "<h2>Draft abgeschlossen</h2>";
+    return;
+  }
+
+  const player = recommendation.player;
+  const score = recommendation.score;
+  const nextOwn = getNextOwnPick();
+  const availability = likelyAvailableAtNextPick(player);
+
+  const alternatives = getAvailablePlayers()
+    .filter(item => item.id !== player.id)
+    .map(item => ({
+      player:item,
+      score:botScore(item)
+    }))
+    .sort((a,b) => b.score - a.score)
+    .slice(0,3);
+
+  const alternativeText = alternatives
+    .map((item,index) => `${index + 1}. ${item.player.name}`)
+    .join("<br>");
+
+  recommendationBox.innerHTML = `
+    <div class="bot-score">${score}</div>
+
+    <div class="sub">🧠 DRAFTBOT EMPFIEHLT</div>
+
+    <div class="recommended-name">${player.name}</div>
+
+    <span class="badge">${player.pos} · ${player.team}</span>
+    <span class="badge">Rank #${player.rank}</span>
+    <span class="badge">Tier ${player.tier}</span>
+
+    <h3>Warum?</h3>
+
+    <ul class="reason">
+      ${explainPlayer(player)
+        .map(reason => `<li>${reason}</li>`)
+        .join("")}
+    </ul>
+
+    <div class="badge">
+      ${
+        availability >= .55
+        ? "🟢 Wahrscheinlich verfügbar"
+        : "🔴 Wahrscheinlich vorher weg"
+      }
+      ${nextOwn ? " bei Pick #" + nextOwn : ""}
+    </div>
+
+    <div style="margin-top:11px">
+      <button
+        id="recommendationPickButton"
+        class="primary">
+        ✓ Empfehlung picken
+      </button>
+    </div>
+
+    <h3>Alternativen</h3>
+    <div class="reason">
+      ${alternativeText || "Keine weiteren Spieler verfügbar."}
+    </div>
+
+    <h3>Was passiert wenn?</h3>
+    <div class="reason">
+      Wenn ${player.name} weg ist →
+      <b>${alternatives[0]?.player.name || "Best Value"}</b><br>
+
+      Wenn beide weg sind →
+      <b>${alternatives[1]?.player.name || "nächste Alternative"}</b><br>
+
+      Wenn alle drei weg sind →
+      <b>${alternatives[2]?.player.name || "besten verfügbaren Spieler nehmen"}</b>
+    </div>
+  `;
+
+  const recommendationButton =
+    document.getElementById("recommendationPickButton");
+
+  recommendationButton.addEventListener("click",() => {
+    makePick(player.id);
+  });
+}
+
+function renderRoster(){
+  const counts = getMyCounts();
+  const limits = rosterLimits();
+
+  let html = "";
+
+  ["QB","RB","WR","TE","K","DST"].forEach(position => {
+    html += `
+      <div class="roster-slot">
+        <span>${position}</span>
+        <strong>${counts[position]}/${limits[position]}</strong>
+      </div>
+    `;
+  });
+
+  html += `
+    <div class="roster-slot">
+      <span>FLEX <small>RB / WR / TE</small></span>
+      <strong>—/${limits.FLEX}</strong>
+    </div>
+  `;
+
+  if(state.roster === "superflex"){
+    html += `
+      <div class="roster-slot">
+        <span>SF <small>QB / RB / WR / TE</small></span>
+        <strong>—/1</strong>
+      </div>
+    `;
+  }
+
+  rosterBox.innerHTML = html;
+}
+
+function renderFilters(){
+  const filters = ["ALL",...positions];
+
+  filterBox.innerHTML = filters.map(filter => `
+    <button
+      class="${activeFilter === filter ? "active" : ""}"
+      data-filter="${filter}">
+      ${filter}
+    </button>
+  `).join("");
+
+  filterBox.querySelectorAll("button").forEach(button => {
+    button.addEventListener("click",() => {
+      activeFilter = button.dataset.filter;
+      renderBoard();
+    });
+  });
+}
+
+function renderBoard(){
+  renderFilters();
+
+  const list = getAvailablePlayers().filter(player => {
+    return activeFilter === "ALL" || player.pos === activeFilter;
+  });
+
+  availableCount.textContent =
+    getAvailablePlayers().length + " verfügbar";
+
+  if(list.length === 0){
+    boardBox.innerHTML =
+      `<div class="empty">Keine Spieler verfügbar.</div>`;
+    return;
+  }
+
+  boardBox.innerHTML = list.map(player => `
+    <div class="player-row">
+      <div>
+        <div class="player-name">${player.name}</div>
+        <div class="player-meta">
+          ${player.pos} · ${player.team} ·
+          <span class="rank">Rank #${player.rank}</span> ·
+          Tier ${player.tier} · Bot ${botScore(player)}
+        </div>
+      </div>
+
+      <button
+        class="${isMyPick() ? "" : "enemy"}"
+        data-player-id="${player.id}">
+        ${isMyPick() ? "PICK" : "WEG"}
+      </button>
+    </div>
+  `).join("");
+
+  boardBox.querySelectorAll("[data-player-id]").forEach(button => {
+    button.addEventListener("click",() => {
+      makePick(button.dataset.playerId);
+    });
+  });
+}
+
+function renderHistory(){
+  if(state.history.length === 0){
+    historyBox.innerHTML =
+      `<div class="empty">Noch keine Picks.</div>`;
+    return;
+  }
+
+  historyBox.innerHTML = state.history
+    .slice()
+    .reverse()
+    .map(item => {
+      const player = getPlayer(item.id);
+      const mine = item.team === Number(state.slot);
+
+      return `
+        <div class="history-pick ${mine ? "mine" : ""}">
+          #${item.pickNumber} · Team ${item.team} ·
+          ${player ? player.name : "Unbekannt"}
+          <span class="muted">
+            ${player ? player.pos + " · " + player.team : ""}
+          </span>
+        </div>
+      `;
+    })
+    .join("");
+}
+
+function render(){
+  teamsSelect.value = state.teams;
+  slotSelect.value = state.slot;
+  scoringSelect.value = state.scoring;
+  rosterSelect.value = state.roster;
+
+  renderStatus();
+  renderRecommendation();
+  renderRoster();
+  renderBoard();
+  renderHistory();
+}
+
+/* -------------------------------------------------------
+   START
+------------------------------------------------------- */
+
+buildPlayers();
+loadState();
+fillSettings();
+render();
+
+</script>
+</body>
+</html>
